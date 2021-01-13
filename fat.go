@@ -103,5 +103,6 @@ func returnSingleArticle(w http.ResponseWriter,r *http.Request){
 }
 func returnAllArticles(w http.ResponseWriter, r *http.Request){
   fmt.Println("art",Articles[0])
+  w.Header().Add("Content-Type", "application/json")
   json.NewEncoder(w).Encode(Articles)
 }
