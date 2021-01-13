@@ -9,6 +9,7 @@ import (
       "encoding/json"
       "reflect"
       "github.com/gorilla/mux"
+      "strconv"
       )
 
 type product struct{
@@ -54,19 +55,32 @@ func homePage(w http.ResponseWriter,r *http.Request){
   fmt.Println("Endpoint Hit:homePage")
 }
 type Article struct {
-  Id string `json:"Id"`
-  Title string  `json:"Title"`
-  Desc string  `json:"desc"`
-  Content string  `json:"content"`
+  Id      int    `json:"Id"`
+  Name string  `json:"Name"`
+  Ccal int `json:"Ccal"`
 }
 var Articles []Article
 func main(){
-  Articles = []Article{
-        Article{Id: "1",Title: "Hello", Desc: "Article Description", Content: "Article Content"},
-        Article{Id: "2",Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
-    }
+
+  /*
+    Articles = []Article{
+        Article{Id: "1", name: "Hello", ccal: "228"},
+        Article{Id: "2", name: "Hello 2", ccal: "322"},
+    }*/
     sl:=DB()
-    fmt.Println(sl,reflect.TypeOf(sl).Kind())
+    Articles =make( []Article,len(sl))
+
+    k:=0
+    for _,i:=range sl{
+      Articles[k].Id = i.id
+      Articles[k].Name = i.name
+      Articles[k].Ccal = i.ccal
+
+      k++
+    }
+    //Articles[1]=Article{Id:1,name:"pivo",ccal:1488}
+    fmt.Println(reflect.TypeOf(Articles).Kind())
+    //fmt.Println(Articles,Articles[0])
     myRouter := mux.NewRouter().StrictSlash(true)
     myRouter.HandleFunc("/",homePage)
     myRouter.HandleFunc("/articles",returnAllArticles)
@@ -75,18 +89,19 @@ func main(){
     log.Fatal(http.ListenAndServe(":9001", myRouter))
   }
 func returnSingleArticle(w http.ResponseWriter,r *http.Request){
-  //fmt.Println("singleart")
+  fmt.Println("singleart")
   vars:=mux.Vars(r)
   key :=vars["id"]
   //fmt.Fprintf(w,"Key:"+key)
   for _, article := range Articles {
-        if article.Id == key {
+        if strconv.Itoa(article.Id) == key {
+          fmt.Println(article,reflect.TypeOf(article).Kind())
             json.NewEncoder(w).Encode(article)
         }
     }
 
 }
 func returnAllArticles(w http.ResponseWriter, r *http.Request){
-  fmt.Println("art")
+  fmt.Println("art",Articles[0])
   json.NewEncoder(w).Encode(Articles)
 }
