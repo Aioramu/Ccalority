@@ -15,6 +15,11 @@ class MyComponent extends React.Component {
   }
   handleChange(event) {    this.setState({value: event.target.value});  }
   handleSubmit(event) {
+    console.log(this.state.value)
+    if (!this.state.value){
+      this.props.onChange(null)
+    }
+
     //console.log(typeof Number(this.state.value))
     event.preventDefault();
     axios({
@@ -35,22 +40,23 @@ class MyComponent extends React.Component {
 });
 }
 
+
   render() {
     const { error, isLoaded, items } = this.state;
     if (error) {
       return (
-      <form onSubmit={this.handleSubmit}> <label>
-      Name:
-      <input type="text" value={this.state.value} onChange={this.handleChange} />        </label>
+      <form onSubmit={this.handleSubmit} name="frm"> <label>
+      Ccal:
+      <input type="number"  value={this.state.value} onChange={this.handleChange} onclick="return IsEmpty();"/>        </label>
       <input type="submit" value="Submit" />
       </form>);
       //<div>Ошибка: {error.message}</div>;
     }  else {
       return (
         <ul>
-        <form onSubmit={this.handleSubmit}> <label>
-        Name:
-        <input type="text" value={this.state.value} onChange={this.handleChange} />        </label>
+        <form onSubmit={this.handleSubmit} name="frm"> <label>
+        Ccal:
+        <input type="number" value={this.state.value} onChange={this.handleChange} onclick="return IsEmpty();"/>        </label>
         <input type="submit" value="Submit" />
         </form>
           {items.map(item => (
