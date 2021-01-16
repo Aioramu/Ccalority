@@ -1,7 +1,7 @@
 package main
 import (
       "fmt"
-      //"strings"
+      "time"
       "database/sql"
       _ "github.com/lib/pq"
       "net/http"
@@ -10,6 +10,8 @@ import (
       "reflect"
       "github.com/gorilla/mux"
       "strconv"
+      "math/rand"
+      //"io/ioutil"
       )
 
 type product struct{
@@ -80,15 +82,18 @@ func main(){
     }
     //Articles[1]=Article{Id:1,name:"pivo",ccal:1488}
     fmt.Println(reflect.TypeOf(Articles).Kind())
-    //fmt.Println(Articles,Articles[0])
+
     myRouter := mux.NewRouter().StrictSlash(true)
+    //List of usability urls
     myRouter.HandleFunc("/",homePage)
     myRouter.HandleFunc("/articles",returnAllArticles)
     myRouter.HandleFunc("/article/{id}", returnSingleArticle)
+    myRouter.HandleFunc("/articleval",SeeAdd).Methods("POST")
     fmt.Println("Rest Api Mux")
     log.Fatal(http.ListenAndServe(":9001", myRouter))
   }
-func returnSingleArticle(w http.ResponseWriter,r *http.Request){
+
+func returnSingleArticle(w http.ResponseWriter,r *http.Request){//func only for 1 product from databa
   fmt.Println("singleart")
   vars:=mux.Vars(r)
   key :=vars["id"]
@@ -96,11 +101,43 @@ func returnSingleArticle(w http.ResponseWriter,r *http.Request){
   for _, article := range Articles {
         if strconv.Itoa(article.Id) == key {
           fmt.Println(article,reflect.TypeOf(article).Kind())
+          w.Header().Add("Content-Type", "application/json")
             json.NewEncoder(w).Encode(article)
         }
     }
 
 }
+type Ccal struct {
+  Ccal int `json:"Ccal"`
+}
+var aue Article//temp var for get back to client list(slice) of pruducts
+func SeeAdd(w http.ResponseWriter, r *http.Request){
+  w.Header().Set("Content-Type", "application/json")
+  fmt.Println("getvar")
+  rand.Seed(time.Now().UnixNano())//random seed
+  var ccal Ccal//input value
+  fmt.Println(json.NewDecoder(r.Body))
+  _=json.NewDecoder(r.Body).Decode(&ccal)//get ccal value
+  fmt.Println(ccal,ccal.Ccal)
+  sum:=0
+  for sum!=ccal.Ccal{//this cycle try to create list of products,that with summary get inputed ccalority value
+
+    sum=0
+    p:=rand.Intn(12)
+    aue:=make([]Article,p)
+    for i:=0;i<p;i++{
+      art:=Articles[rand.Intn(373)]
+      sum+=art.Ccal
+      aue=append(aue,art)
+    }
+    if sum==ccal.Ccal{
+      fmt.Println(aue[p:])
+      json.NewEncoder(w).Encode(aue[p:])
+    }
+  }
+
+}
+
 func returnAllArticles(w http.ResponseWriter, r *http.Request){
   fmt.Println("art",Articles[0])
   w.Header().Add("Content-Type", "application/json")
